@@ -9,6 +9,7 @@
 
 int total_subdirs = 0;
 
+
 void recorre_dir( char *ruta, int level)
 {
     //Se le pasa el nombre del directorio.En lugar de la ruta?
