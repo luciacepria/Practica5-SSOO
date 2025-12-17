@@ -70,6 +70,7 @@ void recorre_dir( char *ruta, int level)
                 break;
 
             case S_IFREG:
+                for (int i = 0; i <= level; i++) printf("   ");
                 printf("%s\n", fichero);
                 break;
         }
