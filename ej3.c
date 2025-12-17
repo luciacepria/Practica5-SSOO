@@ -9,13 +9,6 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-/*
- * JUSTIFICACIÓN DE DISEÑO:
- * 1. exec: Se usa 'execlp' porque conocemos los argumentos (lista) y 
- * queremos usar el PATH (p).
- * 2. Procesos: Se generan secuencialmente hijos para 'cp' y 'diff'.
- * 3. Redirección: Se usa close(1) + dup() para cumplir la restricción de no usar dup2.
- */
 
 void copiar_fichero(const char *origen, const char *destino) {
     pid_t pid = fork();
@@ -25,13 +18,13 @@ void copiar_fichero(const char *origen, const char *destino) {
         return -1;
     }
     if (pid == 0) {
-        // --- HIJO (CP) ---
+        // Hijo Cp
         execlp("cp", "cp", origen, destino, NULL);
         perror("Error ejecutando cp");
         exit(-1); 
     } 
-    // --- PADRE ---
-    wait(NULL); // Esperamos a que termine la copia
+    // Padre
+    wait(NULL); // Esperar
     
 }
 
@@ -47,17 +40,17 @@ void comparar_fichero(const char *origen, const char *destino, int log_fd) {
         return ;
     }
     if (pid == 0) {
-        // --- HIJO (DIFF) ---
-        close(pipe_fd[0]); // Cerramos lectura
+        //Hijo (diff)
+        close(pipe_fd[0]); // Se cierra la lectura
 
-        // 1. Cerramos salida estándar (fd 1)
+        // Se cierra la salida estándar 
         close(1); 
-        // 2. Duplicamos el pipe de escritura. 
+        // Duplicar el pipe de escritura. 
         if (dup(pipe_fd[1]) == -1) {
             perror("dup");
             exit(-1);
         }
-        // 3. Cerramos el fd original del pipe 
+        //Se cierra el pipe de escritura. 
         close(pipe_fd[1]);
 
         execlp("diff", "diff", origen, destino, NULL);
@@ -65,15 +58,15 @@ void comparar_fichero(const char *origen, const char *destino, int log_fd) {
         perror("Error ejecutando diff");
         exit(-1);
     } 
-    // --- PADRE ---
-    close(pipe_fd[1]); // Cerramos escritura
-    char c; // <--- Variable simple, no un array
+    // El padre
+    close(pipe_fd[1]); // Se cierra el pipe la escritura
+    char c; 
     
-    // Leemos 1 byte cada vez (el último parámetro es 1)
+
     while (read(pipe_fd[0], &c, 1) > 0) {
-        // Escribimos ese byte en pantalla
+        // Se escribe el byte en pantalla
         write(1, &c, 1);
-        // Escribimos ese byte en el log
+        // Escribir el byte en el log
         write(log_fd, &c, 1);
     }
 
