@@ -12,10 +12,6 @@ int total_subdirs = 0;
 
 void recorre_dir( char *ruta, int level)
 {
-    //Se le pasa el nombre del directorio.En lugar de la ruta?
-    //Y hay que hacer la funcion recursiva para que si hay subdirectorios o cosas, los recorra.
-    //char *ruta= (char*)arg;
-
     char *fichero;
     char *link_target;
     struct stat datos;
@@ -27,7 +23,7 @@ void recorre_dir( char *ruta, int level)
     if ((dir=opendir(ruta)) == NULL)
     { 
         perror("opendir"); 
-        return;//O exit -1??
+        return;
     }
 
     for (int i = 0; i < level; i++) printf("   ");
@@ -36,22 +32,19 @@ void recorre_dir( char *ruta, int level)
     while ((dp=readdir(dir)) != NULL)
     {   
         if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
-            continue;//O exit -1??
+            continue;
             
         fichero= malloc(strlen(ruta)+strlen(dp->d_name)+2);
         sprintf(fichero,"%s/%s",ruta,dp->d_name);
         if ((lstat(fichero,&datos)) != 0)
         { 
             perror("stat"); 
-            continue; //O exit -1??
+            continue; 
         }
-        
-
         
         switch (datos.st_mode & S_IFMT) {
             case S_IFDIR:
                 total_subdirs++;
-                // Pasamos el puntero 'fichero' a la recursión
                 recorre_dir(fichero, level + 1);
                 break;
 
@@ -64,7 +57,6 @@ void recorre_dir( char *ruta, int level)
                     printf("%s -> %s\n", fichero, link_target);
                 } else {
                     perror("readlink");
-                    //Añadir exit -1??
                 }
                 free(link_target);
                 break;
