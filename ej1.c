@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        ssize_t len = readlink(argv[1], buffer, st.st_size + 1);
+        ssize_t len = readlink(argv[1], buffer, st.st_size);
         if (len == -1)
         {
             perror("readlink");
